@@ -23,6 +23,7 @@ A RESTful API service built with Express.js and TypeScript for handling payment 
 - CORS support
 
 ## Project Structure
+```bash
 src/
 ├── config/         # Configuration files
 ├── controllers/    # Request handlers
@@ -33,3 +34,4 @@ src/
 ├── validations/   # Request validation schemas
 ├── app.ts         # Express app setup
 └── index.ts       # Application entry point
+```

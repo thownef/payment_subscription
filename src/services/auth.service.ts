@@ -25,7 +25,6 @@ const register = async (name: string, email: string, password: string): Promise<
     }
   })
 
-  await generateTokens(user.id)
   return user
 }
 

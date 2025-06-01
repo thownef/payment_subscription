@@ -1,8 +1,9 @@
 import { Request, Response } from 'express'
 import _ from 'lodash'
 import authService from '@/services/auth.service'
-import { httpError, httpOk, httpUnauthorized, httpUnprocessable } from '@/utils/apiHandler'
+import { httpError, httpNoContent, httpOk, httpUnauthorized, httpUnprocessable } from '@/utils/apiHandler'
 import ApiError from '@/utils/ApiError'
+import { User } from '@prisma/client'
 
 const register = async (req: Request, res: Response) => {
   try {
@@ -13,27 +14,41 @@ const register = async (req: Request, res: Response) => {
   } catch (error) {
     if (error instanceof ApiError) {
       return httpUnprocessable(res, error.errors)
-    } else {
-      return httpError(res, error)
     }
+    return httpError(res, error)
   }
 }
 
 const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body
-    const user = await authService.login(email, password)
-    return httpOk(res, user)
+    const tokens = await authService.login(email, password)
+    return httpOk(res, tokens)
   } catch (error) {
     if (error instanceof ApiError) {
       return httpUnauthorized(res)
-    } else {
-      return httpError(res, error)
     }
+    return httpError(res, error)
+  }
+}
+
+const logout = async (req: Request, res: Response) => {
+  try {
+    const refreshToken = req.headers['x-refresh-token']
+    if (!refreshToken || typeof refreshToken !== 'string') {
+      return httpUnauthorized(res)
+    }
+
+    const { id } = req.user as User
+    await authService.logout(id, refreshToken)
+    return httpNoContent(res)
+  } catch (error) {
+    return httpError(res, error)
   }
 }
 
 export default {
   register,
-  login
+  login,
+  logout
 }

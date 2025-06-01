@@ -6,6 +6,7 @@ type ZodSchema = {
   params?: AnyZodObject
   query?: AnyZodObject
   body?: AnyZodObject | ZodEffects<AnyZodObject>
+  headers?: AnyZodObject
 }
 
 const validate = (schema: ZodSchema) => async (req: Request, res: Response, next: NextFunction) => {

@@ -27,45 +27,20 @@ const login = {
 } as const
 
 const logout = {
-  body: z.object({
-    refreshToken: z.string()
+  headers: z.object({
+    'x-refresh-token': z.string()
   })
 } as const
 
-const refreshTokens = {
+const refreshToken = {
   body: z.object({
-    refreshToken: z.string()
-  })
-} as const
-
-const forgotPassword = {
-  body: z.object({
-    email: z.string().email()
-  })
-} as const
-
-const resetPassword = {
-  query: z.object({
-    token: z.string()
-  }),
-  body: z.object({
-    password: z.string().min(8)
-  })
-} as const
-
-// Verify Email
-const verifyEmail = {
-  query: z.object({
-    token: z.string()
+    refresh_token: z.string()
   })
 } as const
 
 export default {
   register,
-  login
-  // logout,
-  // refreshTokens,
-  // forgotPassword,
-  // resetPassword,
-  // verifyEmail
+  login,
+  logout,
+  refreshToken
 }

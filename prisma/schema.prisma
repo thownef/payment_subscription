@@ -57,17 +57,6 @@ model Upload {
   @@map("uploads")
 }
 
-enum DeliveryType {
-  IMMEDIATE @map("immediate")
-  SCHEDULED @map("scheduled")
-}
-
-enum DeliveryStatus {
-  PENDING   @map("pending")
-  COMPLETED @map("completed")
-  FAILED    @map("failed")
-}
-
 model Template {
   id             Int          @id @default(autoincrement())
   userId         Int          @map("user_id")
@@ -77,7 +66,7 @@ model Template {
   block          Json?
   settingBlock   Json?        @map("setting_block")
   content        String       @db.LongText
-  deliveryType   DeliveryType @default(IMMEDIATE) @map("delivery_type")
+  deliveryType   String @default("immediate") @map("delivery_type")
   scheduledAt    DateTime?    @map("scheduled_at")
   image          String
   isClickMeasure Boolean      @default(false) @map("is_click_measure")
@@ -118,8 +107,8 @@ model Reservation {
   subject        String
   content        String         @db.LongText
   scheduledAt    DateTime?      @map("scheduled_at")
-  deliveryType   DeliveryType   @default(IMMEDIATE) @map("delivery_type")
-  deliveryStatus DeliveryStatus @default(PENDING) @map("delivery_status")
+  deliveryType   String         @default("immediate") @map("delivery_type")
+  deliveryStatus String         @default("pending") @map("delivery_status")
   isClickMeasure Boolean        @default(false) @map("is_click_measure")
   isSent         Boolean        @default(false) @map("is_sent")
   createdAt      DateTime       @default(now()) @map("created_at")

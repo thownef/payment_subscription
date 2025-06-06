@@ -1,9 +1,10 @@
-import { Request, Response, NextFunction } from 'express'
+import { Request, Response } from 'express'
+import httpStatus from 'http-status'
 import passport from 'passport'
 import jwt, { SignOptions } from 'jsonwebtoken'
-import { PrismaClient, User } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 import ApiError from '@/utils/ApiError'
-import httpStatus from 'http-status'
+import { getMilliseconds } from '@/utils'
 
 const prisma = new PrismaClient()
 
@@ -22,18 +23,19 @@ export const generateTokens = async (userId: number) => {
     data: {
       token: refreshToken,
       userId: userId,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      expiresAt: new Date(Date.now() + getMilliseconds(process.env.JWT_REFRESH_EXPIRES_IN || '7d'))
     }
   })
 
   return {
-    access_token: accessToken,
-    refresh_token: refreshToken,
-    expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    accessToken,
+    accessTokenExpiresAt: Date.now() + getMilliseconds(process.env.JWT_EXPIRES_IN || '15m'),
+    refreshToken,
+    refreshTokenExpiresAt: Date.now() + getMilliseconds(process.env.JWT_REFRESH_EXPIRES_IN || '7d')
   }
 }
 
-export const refreshToken = async (req: Request, res: Response, next: NextFunction) => {
+export const refreshToken = async (req: Request, res: Response) => {
   const { refresh_token } = req.body
 
   if (!refresh_token) {

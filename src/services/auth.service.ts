@@ -42,7 +42,9 @@ const login = async (email: string, password: string) => {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid email or password')
   }
 
-  return generateTokens(user.id)
+  const tokens = await generateTokens(user.id)
+
+  return { ...user, ...tokens }
 }
 
 const logout = async (userId: number, refreshToken: string) => {

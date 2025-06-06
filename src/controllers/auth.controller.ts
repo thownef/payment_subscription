@@ -22,8 +22,8 @@ const register = async (req: Request, res: Response) => {
 const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body
-    const tokens = await authService.login(email, password)
-    return httpOk(res, tokens)
+    const data = await authService.login(email, password)
+    return httpOk(res, data)
   } catch (error) {
     if (error instanceof ApiError) {
       return httpUnauthorized(res)
@@ -47,8 +47,13 @@ const logout = async (req: Request, res: Response) => {
   }
 }
 
+const me = async (req: Request, res: Response) => {
+  return httpOk(res, req.user)
+}
+
 export default {
   register,
   login,
-  logout
+  logout,
+  me
 }

@@ -2,17 +2,17 @@
 CREATE TABLE `templates` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `user_id` INTEGER NOT NULL,
-    `email_setting_id` INTEGER NOT NULL,
+    `email_setting_id` INTEGER NULL,
     `name` VARCHAR(191) NOT NULL,
-    `subject` VARCHAR(191) NOT NULL,
-    `block` JSON NOT NULL,
-    `setting_block` JSON NOT NULL,
+    `subject` VARCHAR(191) NULL,
+    `block` JSON NULL,
+    `setting_block` JSON NULL,
     `content` LONGTEXT NOT NULL,
-    `delivery_type` ENUM('IMMEDIATE', 'SCHEDULED') NOT NULL DEFAULT 'IMMEDIATE',
-    `scheduled_at` DATETIME(3) NOT NULL,
+    `delivery_type` VARCHAR(191) NOT NULL DEFAULT 'immediate' COMMENT 'immediate, scheduled',
+    `scheduled_at` DATETIME(3) NULL,
     `image` VARCHAR(191) NOT NULL,
     `is_click_measure` BOOLEAN NOT NULL DEFAULT false,
-    `is_draft` BOOLEAN NOT NULL DEFAULT false,
+    `type` VARCHAR(191) NOT NULL DEFAULT 'template' COMMENT 'template, draft, design',
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
@@ -39,6 +39,9 @@ CREATE TABLE `email_settings` (
 
 -- AddForeignKey
 ALTER TABLE `templates` ADD CONSTRAINT `templates_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `templates` ADD CONSTRAINT `templates_email_setting_id_fkey` FOREIGN KEY (`email_setting_id`) REFERENCES `email_settings`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `email_settings` ADD CONSTRAINT `email_settings_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

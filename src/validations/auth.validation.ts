@@ -6,14 +6,14 @@ const register = {
       name: z.string().min(1),
       email: z.string().email(),
       password: z.string().min(8),
-      confirm_password: z.string().min(8)
+      confirmPassword: z.string().min(8)
     })
-    .superRefine(({ password, confirm_password }, ctx) => {
-      if (password !== confirm_password) {
+    .superRefine(({ password, confirmPassword }, ctx) => {
+      if (password !== confirmPassword) {
         ctx.addIssue({
           code: 'custom',
           message: "Passwords don't match",
-          path: ['confirm_password']
+          path: ['confirmPassword']
         })
       }
     })

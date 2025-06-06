@@ -58,34 +58,35 @@ model Upload {
 }
 
 enum DeliveryType {
-  IMMEDIATE
-  SCHEDULED
+  IMMEDIATE @map("immediate")
+  SCHEDULED @map("scheduled")
 }
 
 enum DeliveryStatus {
-  PENDING
-  COMPLETED
-  FAILED
+  PENDING   @map("pending")
+  COMPLETED @map("completed")
+  FAILED    @map("failed")
 }
 
 model Template {
   id             Int          @id @default(autoincrement())
   userId         Int          @map("user_id")
-  emailSettingId Int          @map("email_setting_id")
+  emailSettingId Int?         @map("email_setting_id")
   name           String
-  subject        String
-  block          Json
-  settingBlock   Json         @map("setting_block")
+  subject        String?
+  block          Json?
+  settingBlock   Json?        @map("setting_block")
   content        String       @db.LongText
   deliveryType   DeliveryType @default(IMMEDIATE) @map("delivery_type")
-  scheduledAt    DateTime     @map("scheduled_at")
+  scheduledAt    DateTime?    @map("scheduled_at")
   image          String
   isClickMeasure Boolean      @default(false) @map("is_click_measure")
   type           String       @default("template") @map("type")
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailSetting EmailSetting? @relation(fields: [emailSettingId], references: [id], onDelete: Cascade)
 
   @@map("templates")
 }
@@ -104,7 +105,8 @@ model EmailSetting {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Template Template[]
 
   @@map("email_settings")
 }
@@ -115,7 +117,7 @@ model Reservation {
   emailSettingId Int            @map("email_setting_id")
   subject        String
   content        String         @db.LongText
-  scheduledAt    DateTime       @map("scheduled_at")
+  scheduledAt    DateTime?      @map("scheduled_at")
   deliveryType   DeliveryType   @default(IMMEDIATE) @map("delivery_type")
   deliveryStatus DeliveryStatus @default(PENDING) @map("delivery_status")
   isClickMeasure Boolean        @default(false) @map("is_click_measure")

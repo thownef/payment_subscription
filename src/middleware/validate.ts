@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { AnyZodObject, ZodEffects, ZodError } from 'zod'
+import { camelizeKeys } from 'humps'
 import { httpUnprocessable } from '@/utils/apiHandler'
 
 type ZodSchema = {
@@ -12,13 +13,13 @@ type ZodSchema = {
 const validate = (schema: ZodSchema) => async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (schema.params) {
-      req.params = await schema.params.parseAsync(req.params)
+      req.params = await schema.params.parseAsync(camelizeKeys(req.params))
     }
-    if (schema.query) {
-      req.query = await schema.query.parseAsync(req.query)
+    if (schema.query && Object.keys(req.query).length > 0) {
+      await schema.query.parseAsync(camelizeKeys(req.query))
     }
     if (schema.body) {
-      req.body = await schema.body.parseAsync(req.body)
+      req.body = await schema.body.parseAsync(camelizeKeys(req.body))
     }
     next()
   } catch (error) {

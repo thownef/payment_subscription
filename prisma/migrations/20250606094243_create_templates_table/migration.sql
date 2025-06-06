@@ -8,7 +8,7 @@ CREATE TABLE `templates` (
     `block` JSON NULL,
     `setting_block` JSON NULL,
     `content` LONGTEXT NOT NULL,
-    `delivery_type` ENUM('immediate', 'scheduled') NOT NULL DEFAULT 'immediate',
+    `delivery_type` VARCHAR(191) NOT NULL DEFAULT 'immediate' COMMENT 'immediate, scheduled',
     `scheduled_at` DATETIME(3) NULL,
     `image` VARCHAR(191) NOT NULL,
     `is_click_measure` BOOLEAN NOT NULL DEFAULT false,

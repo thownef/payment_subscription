@@ -14,15 +14,17 @@ datasource db {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
-  name          String
-  email         String         @unique
-  password      String
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
   refreshTokens RefreshToken[]
   Template      Template[]
   EmailSetting  EmailSetting[]
+  Reservation   Reservation[]
 
   @@map("users")
 }
@@ -39,6 +41,20 @@ model RefreshToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("refresh_tokens")
+}
+
+model Upload {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  name      String
+  url       String
+  width     Int
+  height    Int
+  size      Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("uploads")
 }
 
 enum DeliveryType {
@@ -65,7 +81,7 @@ model Template {
   scheduledAt    DateTime     @map("scheduled_at")
   image          String
   isClickMeasure Boolean      @default(false) @map("is_click_measure")
-  isDraft        Boolean      @default(false) @map("is_draft")
+  type           String       @default("template") @map("type")
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
 
@@ -107,19 +123,7 @@ model Reservation {
   createdAt      DateTime       @default(now()) @map("created_at")
   updatedAt      DateTime       @updatedAt @map("updated_at")
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("reservations")
-}
-
-model Upload {
-  id        Int      @id @default(autoincrement())
-  userId    Int      @map("user_id")
-  name      String
-  url       String
-  width     Int
-  height    Int
-  size      Int
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("uploads")
 }

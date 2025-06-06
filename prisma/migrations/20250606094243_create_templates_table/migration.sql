@@ -12,7 +12,7 @@ CREATE TABLE `templates` (
     `scheduled_at` DATETIME(3) NOT NULL,
     `image` VARCHAR(191) NOT NULL,
     `is_click_measure` BOOLEAN NOT NULL DEFAULT false,
-    `is_draft` BOOLEAN NOT NULL DEFAULT false,
+    `type` VARCHAR(191) NOT NULL DEFAULT 'template' COMMENT 'template, draft, design',
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 

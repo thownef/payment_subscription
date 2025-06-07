@@ -4,8 +4,9 @@ import helmet from 'helmet'
 import routes from '@/routes'
 import multer from 'multer'
 import { configurePassport } from '@/config/passport.config'
-import rateLimit from 'express-rate-limit';
-import passport from 'passport';
+import rateLimit from 'express-rate-limit'
+import passport from 'passport'
+import { errorHandler } from '@/middleware/error.middleware'
 
 const app = express()
 const upload = multer()
@@ -19,16 +20,20 @@ app.use(express.json())
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100 // limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
+})
+app.use(limiter)
 
 // Configure Passport
-configurePassport(passport);
-app.use(passport.initialize());
+configurePassport(passport)
+app.use(passport.initialize())
 
 app.use(upload.none())
 app.use(express.urlencoded({ extended: true }))
 
+// Routes
 app.use('/api', routes)
+
+// Error handler
+app.use(errorHandler)
 
 export default app

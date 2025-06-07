@@ -3,17 +3,20 @@ import { z } from 'zod'
 const register = {
   body: z
     .object({
-      name: z.string().min(1),
-      email: z.string().email(),
-      password: z.string().min(8),
-      confirmPassword: z.string().min(8)
+      name: z.string({ message: 'Name is required' }).min(1, { message: 'Name is required' }),
+      email: z.string({ message: 'Email is required' }).email({ message: 'Invalid email address' }),
+      password: z
+        .string({ message: 'Password is required' })
+        .min(6, { message: 'Password must be at least 6 characters long' }),
+      confirmPassword: z
+        .string({ message: 'Confirm password is required' })
+        .min(6, { message: 'Password must be at least 6 characters long' })
     })
     .superRefine(({ password, confirmPassword }, ctx) => {
       if (password !== confirmPassword) {
         ctx.addIssue({
           code: 'custom',
-          message: "Passwords don't match",
-          path: ['confirmPassword']
+          message: "Passwords don't match"
         })
       }
     })
@@ -21,8 +24,10 @@ const register = {
 
 const login = {
   body: z.object({
-    email: z.string(),
-    password: z.string().min(8)
+    email: z.string({ message: 'Email is required' }),
+    password: z
+      .string({ message: 'Password is required' })
+      .min(8, { message: 'Password must be at least 8 characters long' })
   })
 } as const
 
@@ -34,7 +39,7 @@ const logout = {
 
 const refreshToken = {
   body: z.object({
-    refresh_token: z.string()
+    refreshToken: z.string()
   })
 } as const
 

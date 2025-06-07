@@ -1,10 +1,9 @@
-import _ from 'lodash'
 import httpStatus from 'http-status'
 import { User } from '@prisma/client'
 import { prisma } from '@/index'
-import ApiError from '@/utils/ApiError'
 import { encryptPassword, verifyPassword } from '@/utils/encryption'
 import { generateTokens } from '@/middleware/auth.middleware'
+import ApiError from '@/utils/ApiError'
 
 const register = async (name: string, email: string, password: string): Promise<User> => {
   const existingUser = await prisma.user.findUnique({

@@ -62,7 +62,7 @@ const update = async (data: TUpdateTemplate, id: number): Promise<Template> => {
     where: { id }
   })
   if (!template) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Template not found')
+    throw new ApiError(httpStatus.NOT_FOUND)
   }
   const updatedTemplate = await prisma.template.update({
     where: { id: id },

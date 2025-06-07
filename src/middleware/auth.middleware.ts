@@ -3,8 +3,9 @@ import httpStatus from 'http-status'
 import passport from 'passport'
 import jwt, { SignOptions } from 'jsonwebtoken'
 import { PrismaClient } from '@prisma/client'
-import ApiError from '@/utils/ApiError'
 import { getMilliseconds } from '@/utils'
+import ApiError from '@/utils/ApiError'
+import { httpOk } from '@/utils/apiHandler'
 
 const prisma = new PrismaClient()
 
@@ -36,43 +37,31 @@ export const generateTokens = async (userId: number) => {
 }
 
 export const refreshToken = async (req: Request, res: Response) => {
-  const { refresh_token } = req.body
+  const { refreshToken } = req.body
 
-  if (!refresh_token) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Refresh token is required')
-  }
+  const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!) as { sub: string }
+  const userId = parseInt(payload.sub, 10)
 
-  try {
-    const payload = jwt.verify(refresh_token, process.env.JWT_REFRESH_SECRET!) as { sub: string }
-    const userId = parseInt(payload.sub, 10)
-
-    const storedToken = await prisma.refreshToken.findFirst({
-      where: {
-        token: refresh_token,
-        userId: userId,
-        isRevoked: false,
-        expiresAt: {
-          gt: new Date()
-        }
+  const storedToken = await prisma.refreshToken.findFirst({
+    where: {
+      token: refreshToken,
+      userId: userId,
+      isRevoked: false,
+      expiresAt: {
+        gt: new Date()
       }
-    })
-
-    if (!storedToken) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid refresh token')
     }
+  })
 
-    await prisma.refreshToken.update({
-      where: { id: storedToken.id },
-      data: { isRevoked: true }
-    })
-
-    const tokens = await generateTokens(userId)
-    res.json(tokens)
-  } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid refresh token')
-    }
-    throw error
+  if (!storedToken) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid refresh token')
   }
-}
 
+  await prisma.refreshToken.update({
+    where: { id: storedToken.id },
+    data: { isRevoked: true }
+  })
+
+  const tokens = await generateTokens(userId)
+  return httpOk(res, tokens)
+}

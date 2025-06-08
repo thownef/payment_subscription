@@ -27,13 +27,16 @@ app.use(limiter)
 configurePassport(passport)
 app.use(passport.initialize())
 
+// Multer middleware
 app.use(upload.none())
-app.use(express.urlencoded({ extended: true }))
 
-// Routes
-app.use('/api', routes)
+// URL-encoded middleware
+app.use(express.urlencoded({ extended: true }))
 
 // Error handler
 app.use(errorHandler)
+
+// Routes
+app.use('/api', routes)
 
 export default app

@@ -33,10 +33,10 @@ app.use(upload.none())
 // URL-encoded middleware
 app.use(express.urlencoded({ extended: true }))
 
-// Error handler
-app.use(errorHandler)
-
 // Routes
 app.use('/api', routes)
+
+// Error handler
+app.use(errorHandler)
 
 export default app

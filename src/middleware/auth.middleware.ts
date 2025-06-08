@@ -30,9 +30,8 @@ export const generateTokens = async (userId: number) => {
 
   return {
     accessToken,
-    accessTokenExpiresAt: Date.now() + getMilliseconds(process.env.JWT_EXPIRES_IN || '15m'),
     refreshToken,
-    refreshTokenExpiresAt: Date.now() + getMilliseconds(process.env.JWT_REFRESH_EXPIRES_IN || '7d')
+    expiresAt: getMilliseconds(process.env.JWT_REFRESH_EXPIRES_IN || '7d') / 1000
   }
 }
 

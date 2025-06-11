@@ -21,10 +21,11 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  refreshTokens RefreshToken[]
-  Template      Template[]
-  EmailSetting  EmailSetting[]
-  Reservation   Reservation[]
+  refreshTokens  RefreshToken[]
+  Template       Template[]
+  EmailSetting   EmailSetting[]
+  Reservation    Reservation[]
+  StripeCustomer StripeCustomer?
 
   @@map("users")
 }
@@ -58,21 +59,21 @@ model Upload {
 }
 
 model Template {
-  id             Int          @id @default(autoincrement())
-  userId         Int          @map("user_id")
-  emailSettingId Int?         @map("email_setting_id")
+  id             Int       @id @default(autoincrement())
+  userId         Int       @map("user_id")
+  emailSettingId Int?      @map("email_setting_id")
   name           String
   subject        String?
   block          Json?
-  settingBlock   Json?        @map("setting_block")
-  content        String       @db.LongText
-  deliveryType   String @default("immediate") @map("delivery_type")
-  scheduledAt    DateTime?    @map("scheduled_at")
+  settingBlock   Json?     @map("setting_block")
+  content        String    @db.LongText
+  deliveryType   String    @default("immediate") @map("delivery_type")
+  scheduledAt    DateTime? @map("scheduled_at")
   image          String
-  isClickMeasure Boolean      @default(false) @map("is_click_measure")
-  type           String       @default("template") @map("type")
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
+  isClickMeasure Boolean   @default(false) @map("is_click_measure")
+  type           String    @default("template") @map("type")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   emailSetting EmailSetting? @relation(fields: [emailSettingId], references: [id], onDelete: Cascade)
@@ -101,20 +102,90 @@ model EmailSetting {
 }
 
 model Reservation {
-  id             Int            @id @default(autoincrement())
-  userId         Int            @map("user_id")
-  emailSettingId Int            @map("email_setting_id")
+  id             Int       @id @default(autoincrement())
+  userId         Int       @map("user_id")
+  emailSettingId Int       @map("email_setting_id")
   subject        String
-  content        String         @db.LongText
-  scheduledAt    DateTime?      @map("scheduled_at")
-  deliveryType   String         @default("immediate") @map("delivery_type")
-  deliveryStatus String         @default("pending") @map("delivery_status")
-  isClickMeasure Boolean        @default(false) @map("is_click_measure")
-  isSent         Boolean        @default(false) @map("is_sent")
-  createdAt      DateTime       @default(now()) @map("created_at")
-  updatedAt      DateTime       @updatedAt @map("updated_at")
+  content        String    @db.LongText
+  scheduledAt    DateTime? @map("scheduled_at")
+  deliveryType   String    @default("immediate") @map("delivery_type")
+  deliveryStatus String    @default("pending") @map("delivery_status")
+  isClickMeasure Boolean   @default(false) @map("is_click_measure")
+  isSent         Boolean   @default(false) @map("is_sent")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("reservations")
+}
+
+model StripeCustomer {
+  id               Int      @id @default(autoincrement())
+  userId           Int      @unique @map("user_id")
+  stripeCustomerId String   @unique @map("stripe_customer_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscriptions Subscription[]
+  PaymentMethod PaymentMethod[]
+
+  @@map("stripe_customers")
+}
+
+model Subscription {
+  id                   Int       @id @default(autoincrement())
+  stripeCustomerId     Int       @map("stripe_customer_id")
+  planId               Int       @map("plan_id")
+  stripeSubscriptionId String    @unique @map("stripe_subscription_id")
+  status               String // active, canceled, past_due, etc.
+  currentPeriodStart   DateTime  @map("current_period_start")
+  currentPeriodEnd     DateTime  @map("current_period_end")
+  cancelAtPeriodEnd    Boolean   @default(false) @map("cancel_at_period_end")
+  canceledAt           DateTime? @map("canceled_at")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  customer StripeCustomer @relation(fields: [stripeCustomerId], references: [id], onDelete: Cascade)
+  plan     Plan           @relation(fields: [planId], references: [id])
+
+  @@map("subscriptions")
+}
+
+model Plan {
+  id              Int      @id @default(autoincrement())
+  name            String
+  description     String?
+  stripePriceId   String   @unique @map("stripe_price_id")
+  stripeProductId String   @unique @map("stripe_product_id")
+  price           Decimal  @db.Decimal(10, 2)
+  currency        String   @default("usd")
+  interval        String // monthly, yearly
+  features        Json? // Store features as JSON array
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model PaymentMethod {
+  id                    Int      @id @default(autoincrement())
+  stripeCustomerId      Int      @map("stripe_customer_id")
+  stripePaymentMethodId String   @unique @map("stripe_payment_method_id")
+  type                  String // card, bank_account, etc.
+  last4                 String? // Last 4 digits of card/account
+  brand                 String? // visa, mastercard, etc.
+  expiryMonth           Int?     @map("expiry_month")
+  expiryYear            Int?     @map("expiry_year")
+  isDefault             Boolean  @default(false) @map("is_default")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  customer StripeCustomer @relation(fields: [stripeCustomerId], references: [id], onDelete: Cascade)
+
+  @@map("payment_methods")
 }

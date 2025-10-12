@@ -7,6 +7,7 @@ import { configurePassport } from '@/config/passport.config'
 import rateLimit from 'express-rate-limit'
 import passport from 'passport'
 import { errorHandler } from '@/middleware/error.middleware'
+import { handleNotFound, initializeErrorHandlers } from '@/utils/globalErrorHandler'
 
 const app = express()
 const upload = multer()
@@ -36,7 +37,13 @@ app.use(express.urlencoded({ extended: true }))
 // Routes
 app.use('/api', routes)
 
+// 404 handler for undefined routes
+app.use(handleNotFound)
+
 // Error handler
 app.use(errorHandler)
+
+// Initialize global error handlers
+initializeErrorHandlers()
 
 export default app

@@ -34,7 +34,7 @@ const me = async (req: Request, res: Response) => {
 
 const refreshToken = async (req: Request, res: Response) => {
   const { refreshToken } = req.body
-  const data = await refreshToken(refreshToken)
+  const data = await authService.refreshToken(refreshToken)
   return httpOk(res, data)
 }
 

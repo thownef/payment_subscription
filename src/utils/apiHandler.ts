@@ -72,3 +72,19 @@ export const httpError = (res: Response, error: Error | unknown, message = 'Inte
   const errorResponse = process.env.NODE_ENV === 'development' ? error : undefined
   sendResponse(res, httpStatus.INTERNAL_SERVER_ERROR, false, errorResponse, message)
 }
+
+export const httpConflict = (res: Response, message = 'Conflict'): void => {
+  sendResponse(res, httpStatus.CONFLICT, false, undefined, message)
+}
+
+export const httpTooManyRequests = (res: Response, message = 'Too Many Requests'): void => {
+  sendResponse(res, httpStatus.TOO_MANY_REQUESTS, false, undefined, message)
+}
+
+export const httpServiceUnavailable = (res: Response, message = 'Service Unavailable'): void => {
+  sendResponse(res, httpStatus.SERVICE_UNAVAILABLE, false, undefined, message)
+}
+
+export const httpAccepted = <T>(res: Response, data?: T, message = 'Accepted'): void => {
+  sendResponse(res, httpStatus.ACCEPTED, true, data, message)
+}

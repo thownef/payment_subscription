@@ -4,6 +4,7 @@ import { prisma } from '@/index'
 import { encryptPassword, verifyPassword } from '@/utils/encryption'
 import { generateTokens } from '@/middleware/auth.middleware'
 import ApiError from '@/utils/ApiError'
+import jwt from 'jsonwebtoken'
 
 const register = async (name: string, email: string, password: string): Promise<User> => {
   const existingUser = await prisma.user.findUnique({
@@ -59,8 +60,36 @@ const logout = async (userId: number, refreshToken: string) => {
   })
 }
 
+const refreshToken = async (refreshToken: string) => {
+  const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!) as { sub: string }
+  const userId = parseInt(payload.sub, 10)
+
+  const storedToken = await prisma.refreshToken.findFirst({
+    where: {
+      token: refreshToken,
+      userId: userId,
+      isRevoked: false,
+      expiresAt: {
+        gt: new Date()
+      }
+    }
+  })
+
+  if (!storedToken) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid refresh token')
+  }
+
+  await prisma.refreshToken.update({
+    where: { id: storedToken.id },
+    data: { isRevoked: true }
+  })
+
+  return await generateTokens(userId)
+}
+
 export default {
   register,
   login,
-  logout
+  logout,
+  refreshToken
 }

@@ -2,7 +2,9 @@ import http from 'http'
 import dotenv from 'dotenv'
 import app from '@/app.js'
 import { PrismaClient } from '@prisma/client'
+import { PrismaClient as MasterPrismaClient } from '@prisma/client-master'
 export const prisma = new PrismaClient()
+export const masterPrisma = new MasterPrismaClient()
 
 dotenv.config()
 

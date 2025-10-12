@@ -47,7 +47,7 @@ const getList = async (req: Request, res: Response) => {
 
   const result = await uploadService.getList(filter, options)
 
-  return httpOk(res, result, 'Uploads retrieved successfully')
+  return httpOk(res, result)
 }
 
 const destroy = async (req: Request, res: Response) => {

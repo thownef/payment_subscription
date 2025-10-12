@@ -2,7 +2,6 @@ import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import routes from '@/routes'
-import multer from 'multer'
 import { configurePassport } from '@/config/passport.config'
 import rateLimit from 'express-rate-limit'
 import passport from 'passport'
@@ -10,7 +9,6 @@ import { errorHandler } from '@/middleware/error.middleware'
 import { handleNotFound, initializeErrorHandlers } from '@/utils/globalErrorHandler'
 
 const app = express()
-const upload = multer()
 
 // Security middleware
 app.use(helmet())
@@ -27,9 +25,6 @@ app.use(limiter)
 // Configure Passport
 configurePassport(passport)
 app.use(passport.initialize())
-
-// Multer middleware
-app.use(upload.none())
 
 // URL-encoded middleware
 app.use(express.urlencoded({ extended: true }))

@@ -20,7 +20,7 @@ const validate = (schema: ValidateSchema) => async (req: Request, res: Response,
       req.query = await schema.query.parseAsync(camelizeKeys(req.query))
     }
     if (schema.body) {
-      req.body = await schema.body.parseAsync(camelizeKeys(req.body))
+      req.body = await schema.body.parseAsync(camelizeKeys(req.body || {}))
     }
     if (schema.headers) {
       req.headers = await schema.headers.parseAsync(camelizeKeys(req.headers))

@@ -3,9 +3,10 @@ import validate from '@/middleware/validate.middleware'
 import catchAsync from '@/utils/catchAsync'
 import tenantValidation from '@/validations/tenant.validation'
 import tenantController from '@/controllers/tenant.controller'
+import { debugTenantRegister } from '@/middleware/debug.middleware'
 
 const router = express.Router()
 
-router.route('/register').post(validate(tenantValidation.register), catchAsync(tenantController.register))
+router.route('/register').post(debugTenantRegister, validate(tenantValidation.register), catchAsync(tenantController.register))
 
 export default router

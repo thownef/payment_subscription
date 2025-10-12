@@ -6,14 +6,16 @@ import { User } from '@prisma/client'
 
 const register = async (req: Request, res: Response) => {
   const { name, email, password } = req.body
-  const user = await authService.register(name, email, password)
+  const tenantId = req.tenantId!
+  const user = await authService.register(name, email, password, tenantId)
   const transformedUser = _.omit(user, ['password', 'createdAt', 'updatedAt'])
   return httpOk(res, transformedUser)
 }
 
 const login = async (req: Request, res: Response) => {
   const { email, password } = req.body
-  const data = await authService.login(email, password)
+  const tenantId = req.tenantId!
+  const data = await authService.login(email, password, tenantId)
   return httpOk(res, data)
 }
 
@@ -24,7 +26,8 @@ const logout = async (req: Request, res: Response) => {
   }
 
   const { id } = req.user as User
-  await authService.logout(id, refreshToken)
+  const tenantId = req.tenantId!
+  await authService.logout(id, refreshToken, tenantId)
   return httpNoContent(res)
 }
 
@@ -34,7 +37,8 @@ const me = async (req: Request, res: Response) => {
 
 const refreshToken = async (req: Request, res: Response) => {
   const { refreshToken } = req.body
-  const data = await authService.refreshToken(refreshToken)
+  const tenantId = req.tenantId!
+  const data = await authService.refreshToken(refreshToken, tenantId)
   return httpOk(res, data)
 }
 

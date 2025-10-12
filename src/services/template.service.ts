@@ -3,6 +3,7 @@ import { Template } from '@prisma/client'
 import { TCreateTemplate, TUpdateTemplate } from '@/validations/template.validation'
 import ApiError from '@/utils/ApiError'
 import httpStatus from 'http-status'
+import { getTenantPrisma } from '@/services/tenantDatabase.service'
 
 const getList = async <Key extends keyof Template>(
   filter: object,
@@ -12,6 +13,7 @@ const getList = async <Key extends keyof Template>(
     sortBy?: string
     sortType?: 'asc' | 'desc'
   },
+  tenantId: number,
   keys: Key[] = [
     'id',
     'userId',
@@ -34,14 +36,17 @@ const getList = async <Key extends keyof Template>(
   const limit = options.limit ?? 10
   const sortBy = options.sortBy
   const sortType = options.sortType ?? 'desc'
-  const templates = await prisma.template.findMany({
+  
+  const tenantPrisma = await getTenantPrisma(tenantId)
+  
+  const templates = await tenantPrisma.template.findMany({
     where: filter,
     select: keys.reduce((obj, k) => ({ ...obj, [k]: true }), {}),
     skip: (page - 1) * limit,
     take: limit,
     orderBy: sortBy ? { [sortBy]: sortType } : { createdAt: 'desc' }
   })
-  const total = await prisma.template.count({
+  const total = await tenantPrisma.template.count({
     where: filter
   })
   return {
@@ -50,35 +55,41 @@ const getList = async <Key extends keyof Template>(
   }
 }
 
-const create = async (data: TCreateTemplate & { userId: number }): Promise<Template> => {
-  const template = await prisma.template.create({
+const create = async (data: TCreateTemplate & { userId: number }, tenantId: number): Promise<Template> => {
+  const tenantPrisma = await getTenantPrisma(tenantId)
+  
+  const template = await tenantPrisma.template.create({
     data
   })
   return template
 }
 
-const update = async (data: TUpdateTemplate, id: number): Promise<Template> => {
-  const template = await prisma.template.findUnique({
+const update = async (data: TUpdateTemplate, id: number, tenantId: number): Promise<Template> => {
+  const tenantPrisma = await getTenantPrisma(tenantId)
+  
+  const template = await tenantPrisma.template.findUnique({
     where: { id }
   })
   if (!template) {
     throw new ApiError(httpStatus.NOT_FOUND)
   }
-  const updatedTemplate = await prisma.template.update({
+  const updatedTemplate = await tenantPrisma.template.update({
     where: { id: id },
     data
   })
   return updatedTemplate
 }
 
-const destroy = async (id: number) => {
-  const template = await prisma.template.findUnique({
+const destroy = async (id: number, tenantId: number) => {
+  const tenantPrisma = await getTenantPrisma(tenantId)
+  
+  const template = await tenantPrisma.template.findUnique({
     where: { id }
   })
   if (!template) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Template not found')
   }
-  await prisma.template.delete({
+  await tenantPrisma.template.delete({
     where: { id }
   })
   return true

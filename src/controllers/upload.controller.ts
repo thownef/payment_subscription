@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { uploadService } from '@/services'
-import { TUploadFile, TQueryUploads, TUpdateUpload } from '@/validations/upload.validation'
+import { TUploadFile, TQueryUploads } from '@/validations/upload.validation'
 import ApiError from '@/utils/ApiError'
 import httpStatus from 'http-status'
 import { httpCreated, httpOk, httpNoContent, httpUnprocessable } from '@/utils/apiHandler'

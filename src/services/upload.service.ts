@@ -9,13 +9,17 @@ import { UploadApiResponse } from 'cloudinary'
 const uploadFile = async (
   file: Express.Multer.File,
   userId: number,
-  options: TUploadFile = { folder: 'uploads' }
+  options: TUploadFile = { folder: 'collections' }
 ): Promise<Upload> => {
   let cloudinaryResult: UploadApiResponse | null = null
 
   try {
+    const projectName = process.env.PROJECT_NAME || 'app'
+    const collection = options.folder || 'collections'
+    const folderPath = `${projectName}/${collection}/${userId}`
+
     const uploadOptions = {
-      folder: options.folder || 'uploads',
+      folder: folderPath,
       transformation: options.transformation
     }
 
@@ -38,7 +42,7 @@ const uploadFile = async (
         width: cloudinaryResult.width,
         height: cloudinaryResult.height,
         size: cloudinaryResult.bytes,
-        folder: uploadOptions.folder,
+        folder: folderPath,
         publicId: cloudinaryResult.public_id
       }
     })
